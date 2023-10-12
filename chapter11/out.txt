@@ -1,0 +1,55 @@
+0000: #include <stdio.h>
+0001: #include <string.h>
+0002: 
+0003: int
+0004: main(int argc, char *argv[])
+0005: {
+0006: 	char buf[8192];
+0007: 	char *c;
+0008: 	int line_no;
+0009: 	FILE *fp_read, *fp_write;
+0010: 
+0011: 	if (argc != 2) {
+0012: 		printf("usage: %s [filename]\n", argv[0]);
+0013: 		return -1;
+0014: 	}
+0015: 
+0016: 	fp_read = fopen(argv[1], "r");
+0017: 	if (fp_read == NULL) {
+0018: 		printf("Can't open file\n");
+0019: 		return -1;
+0020: 	}
+0021: 
+0022: 	fp_write = fopen("out.txt", "w");
+0023: 	if (fp_write == NULL) {
+0024: 		printf("Can't create file\n");
+0025: 		fclose(fp_read);
+0026: 		return -1;
+0027: 	}
+0028: 
+0029: 	line_no = 0;
+0030: 	while ((fgets(buf, sizeof(buf), fp_read)) != NULL) {
+0031: 		c = strchr(buf, '\n');
+0032: 		if (c != NULL) {
+0033: 			*c = '\0';
+0034: 		}
+0035: 		if (fprintf(fp_write, "%04d: %s\n", line_no++, buf) < 0) {
+0036: 			if (ferror(fp_write)) {
+0037: 				printf("Error\n");
+0038: 				fclose(fp_write);
+0039: 				fclose(fp_read);
+0040: 			}
+0041: 		}
+0042: 	}
+0043: 
+0044: 	if (feof(fp_read)) {
+0045: 		printf("End of file\n");
+0046: 	} else if (ferror(fp_read)) {
+0047: 		printf("Error\n");
+0048: 	}
+0049: 
+0050: 	fclose(fp_write);
+0051: 	fclose(fp_read);
+0052: 
+0053: 	return 0;
+0054: }
